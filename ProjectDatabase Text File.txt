@@ -1,0 +1,105 @@
+CREATE DATABASE Recipes;
+USE Recipes;
+
+CREATE TABLE employees (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    position VARCHAR(100) NOT NULL,
+    ssn CHAR(11) UNIQUE NOT NULL,  -- Format: XXX-XX-XXXX
+    home_address TEXT NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone_number VARCHAR(15) NOT NULL,
+    skills TEXT,  -- List of skills (comma-separated or separate table if needed)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,  -- Hashed password
+    available_ingredients TEXT,  -- List of ingredient names or link to ingredient IDs
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE recipes (
+    r_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    instructions TEXT NOT NULL,
+    ingredients TEXT,  -- Can also be a link to recipe_ingredients table for normalized data
+    amount_favorited INT DEFAULT 0,
+    uploaded_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE ingredients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    category VARCHAR(100)  -- For grouping into 33 types based on categories like Supercook
+);
+
+CREATE TABLE recipe_ingredients (
+    recipe_id INT,
+    ingredient_id INT,
+    PRIMARY KEY (recipe_id, ingredient_id),
+    FOREIGN KEY (recipe_id) REFERENCES recipes(r_id) ON DELETE CASCADE,
+    FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE favorite_recipes (
+    user_id INT,
+    recipe_id INT,
+    PRIMARY KEY (user_id, recipe_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(r_id) ON DELETE CASCADE
+);
+
+CREATE TABLE favorite_recipes (
+    user_id INT,
+    recipe_id INT,
+    PRIMARY KEY (user_id, recipe_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(r_id) ON DELETE CASCADE
+);
+
+-- Sample data for employees
+INSERT INTO employees (name, position, ssn, home_address, email, phone_number, skills) VALUES 
+('John Doe', 'Head Chef', '123-45-6789', '123 Kitchen St', 'john@example.com', '1234567890', 'Cooking, Baking'),
+('Alice Smith', 'Sous Chef', '234-56-7890', '456 Culinary Rd', 'alice@example.com', '2345678901', 'Grilling, Plating');
+
+-- Sample data for users
+INSERT INTO users (username, email, password_hash, available_ingredients) VALUES 
+('foodie123', 'foodie@example.com', 'hashedpassword123', 'Salt, Sugar, Flour'),
+('chefmaster', 'chef@example.com', 'hashedpassword456', 'Eggs, Milk, Butter');
+
+-- Sample data for ingredients
+INSERT INTO ingredients (name, category) VALUES 
+('Salt', 'Spices'), ('Flour', 'Grains'), ('Eggs', 'Dairy'), ('Milk', 'Dairy'), ('Butter', 'Dairy');
+
+-- Sample data for recipes
+INSERT INTO recipes (name, description, instructions, ingredients, amount_favorited, uploaded_by) VALUES 
+('Pancakes', 'A simple pancake recipe.', 'Mix flour, eggs, and milk. Cook in a pan.', 'Flour, Eggs, Milk', 10, 1),
+('Omelette', 'Classic French-style omelette.', 'Beat eggs, add salt, and cook in a pan.', 'Eggs, Salt, Butter', 5, 2);
+
+-- Sample data for recipe_ingredients (linking recipes and ingredients)
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES 
+(1, 2), -- Pancakes with Flour
+(1, 3), -- Pancakes with Eggs
+(1, 4), -- Pancakes with Milk
+(2, 3), -- Omelette with Eggs
+(2, 1); -- Omelette with Salt
+
+-- Sample data for favorite_recipes (linking users and favorite recipes)
+INSERT INTO favorite_recipes (user_id, recipe_id) VALUES 
+(1, 1), -- User 1 favorites Pancakes
+(2, 2); -- User 2 favorites Omelette
+
+SELECT * FROM favorite_recipes;
+SELECT * FROM recipe_ingredients;
+SELECT * FROM ingredients;
+SELECT * FROM recipes;
+SELECT * FROM users;
+SELECT * FROM employees;
